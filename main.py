@@ -13,6 +13,21 @@ Microservice for Smartjinny🚀
 You can make wonderful things
 """
 
+tags_metadata = [
+    {
+        "name": "data",
+        "description": "Get data by id, static json data in env",
+    },
+    {
+        "name": "list",
+        "description": "return all the id, static json data in env",
+        "externalDocs": {
+            "description": "external docs",
+            "url": "https://smartjinny.com/",
+        },
+    },
+]
+
 app = FastAPI(
     title="Smartjinny Microservice",
     description=description,
@@ -27,6 +42,7 @@ app = FastAPI(
         "name": "Apache 2.0",
         "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
     },
+    openapi_tags=tags_metadata
 )
 
 # Connect Database
@@ -49,15 +65,18 @@ async def root():
     col = db["SMARTJIN"]["agent"]
     return col.find_one({},{'_id': 0})
 
-@app.get("/{id}")
+@app.get("/data/{id}", tags=["data"])
 async def gets(id):
     for ga in data["dataset"]:
         if ga["identifier"]==id:
             return ga        
     return "fail"    
 
-@app.get("/items/{item_id}")
-async def read_item(item_id: int):
-    return {"item_id": item_id}
+@app.get("/data/", tags=["list"])
+async def list_item():
+    new_list = []
+    for ga in data["dataset"]:
+        new_list.append(ga["identifier"])
+    return {"list": new_list}
 
 f.close()
