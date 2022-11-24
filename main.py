@@ -65,6 +65,13 @@ async def root():
     col = db["SMARTJIN"]["agent"]
     return col.find_one({},{'_id': 0})
 
+@app.get("/sales/{id}", tags=["data"])
+async def getSales(id):
+    db = get_database()
+    col = db["sample_supplies"]["sales"]
+    #sample 5bd761dcae323e45a93ccfeb
+    return col.find_one({'_id': id},{})
+
 @app.get("/data/{id}", tags=["data"])
 async def gets(id):
     for ga in data["dataset"]:
