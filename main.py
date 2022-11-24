@@ -71,13 +71,13 @@ async def getSales(id: str):
     db = get_database()
     col = db["sample_supplies"]["sales"]
     #sample 5bd761dcae323e45a93ccfeb
-    return col.find_one({'_id': ObjectId(id)})
+    return col.find_one({'_id': ObjectId(id)}, {'_id': 0})
 
 @app.get("/sales/", tags=["list"])
 async def getSales():
     db = get_database()
     col = db["sample_supplies"]["sales"]
-    return col.find().sort({'_id': 1}).limit(50)
+    return col.find().limit(50)
 
 @app.get("/data/{id}", tags=["data"])
 async def gets(id):
