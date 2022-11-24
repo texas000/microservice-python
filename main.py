@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 import json
 from pymongo import MongoClient
-from bson.objectid import ObjectId
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -66,18 +65,18 @@ async def root():
     col = db["SMARTJIN"]["agent"]
     return col.find_one({},{'_id': 0})
 
-@app.get("/sales/{id}", tags=["data"])
-async def getSales(id: str):
+@app.get("/sales/{store}", tags=["data"])
+async def getSales(store: str):
     db = get_database()
     col = db["sample_supplies"]["sales"]
     #sample 5bd761dcae323e45a93ccfeb
-    return col.find_one({'_id': ObjectId(id)}, {'_id': 0})
+    return col.find({'storeLocation': store}, {'_id': 0})
 
 @app.get("/sales/", tags=["list"])
 async def getSales():
     db = get_database()
     col = db["sample_supplies"]["sales"]
-    return col.find().limit(50)
+    return col.find({},{'_id': 0,}).limit(50)
 
 @app.get("/data/{id}", tags=["data"])
 async def gets(id):
