@@ -77,7 +77,7 @@ async def getSales(id):
 async def getSales(id):
     db = get_database()
     col = db["sample_supplies"]["sales"]
-    return col.find().sort({_id:1}).limit(50)
+    return col.find().sort({'_id': 1}).limit(50)
 
 @app.get("/data/{id}", tags=["data"])
 async def gets(id):
