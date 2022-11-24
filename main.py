@@ -65,6 +65,12 @@ async def root():
     col = db["SMARTJIN"]["agent"]
     return col.find_one({},{'_id': 0})
 
+@app.get("/s")
+async def root():
+    db = get_database()
+    col = db["sample_supplies"]["sales"]
+    return col.find_one({},{'_id': 0})
+
 @app.get("/sales/{store}", tags=["data"])
 async def getSales(store: str):
     db = get_database()
