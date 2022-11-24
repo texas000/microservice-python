@@ -120,7 +120,7 @@ engine.index_documents(docs)
 fields_to_search = ["title", "description", "tags"]
 
 @api_router.get("/search/", status_code=200)
-def search(q: Optional[str] = None):
+async def search(q: str):
     if not q:
         return "fail"
     result = engine.query(q, fields_to_search, highlight=True)
