@@ -4,7 +4,30 @@ from pymongo import MongoClient
 import os
 from dotenv import load_dotenv
 load_dotenv()
-app = FastAPI()
+
+description = """
+Microservice for Smartjinny🚀
+
+## Hello
+
+You can make wonderful things
+"""
+
+app = FastAPI(
+    title="Smartjinny Microservice",
+    description=description,
+    version="0.0.1",
+    terms_of_service="https://smartjinny.com/terms/",
+    contact={
+        "name": "Smartjinny Microservice",
+        "url": "https://smartjinny.com/contact/",
+        "email": "admin@smartjinny.com",
+    },
+    license_info={
+        "name": "Apache 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
+    },
+)
 
 # Connect Database
 def get_database():
