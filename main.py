@@ -75,7 +75,7 @@ async def getSocial(id: str):
 async def getSocialList():
     db = get_database()
     col = db["SMARTJIN"]["social"]
-    return col.find().sort({$natural: -1}).limit(50)
+    return []
 
 @app.get("/data/{id}", tags=["data"])
 async def gets(id):
