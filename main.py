@@ -65,23 +65,17 @@ async def root():
     col = db["SMARTJIN"]["agent"]
     return col.find_one({},{'_id': 0})
 
-@app.get("/s")
-async def root():
+@app.get("/social/{id}", tags=["data"])
+async def getSocial(id: str):
     db = get_database()
     col = db["SMARTJIN"]["social"]
-    return col.find_one({},{'_id': 0})
-
-@app.get("/social/{title}", tags=["data"])
-async def getSocial(title: str):
-    db = get_database()
-    col = db["SMARTJIN"]["social"]
-    return col.find({'title': title}, {'_id': 0})
+    return col.find({'identifier': id}, {'_id': 0})
 
 @app.get("/social/", tags=["list"])
 async def getSocialList():
     db = get_database()
     col = db["SMARTJIN"]["social"]
-    return col.find({},{'_id': 0,}).limit(50)
+    return col.find().sort({$natural: -1}).limit(50)
 
 @app.get("/data/{id}", tags=["data"])
 async def gets(id):
