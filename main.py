@@ -69,7 +69,7 @@ async def root():
 async def getSocial(id: str):
     db = get_database()
     socialCol = db["SMARTJIN"]["social"]
-    return col.find({'identifier': id}, {'_id': 0})
+    return socialCol.find({'identifier': id}, {'_id': 0})
 
 @app.get("/social/", tags=["list"])
 async def getSocialList():
