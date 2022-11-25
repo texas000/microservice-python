@@ -68,13 +68,13 @@ async def root():
 @app.get("/social/{id}", tags=["data"])
 async def getSocial(id: str):
     db = get_database()
-    social = await db["SMARTJIN"]["social"].find({'identifier': id}, {'_id': 0})
+    social = db["SMARTJIN"]["social"].find({'identifier': id}, {'_id': 0})
     return social
 
 @app.get("/social/", tags=["list"])
 async def getSocialList():
     db = get_database()
-    list = await db["SMARTJIN"]["social"].find().limit(10)
+    list = db["SMARTJIN"]["social"].find().limit(10)
     return list
 
 @app.get("/data/{id}", tags=["data"])
