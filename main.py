@@ -68,20 +68,19 @@ async def root():
 @app.get("/s")
 async def root():
     db = get_database()
-    col = db["sample_supplies"]["sales"]
+    col = db["SMARTJIN"]["social"]
     return col.find_one({},{'_id': 0})
 
-@app.get("/sales/{store}", tags=["data"])
-async def getSales(store: str):
+@app.get("/social/{title}", tags=["data"])
+async def getSocial(title: str):
     db = get_database()
-    col = db["sample_supplies"]["sales"]
-    #sample 5bd761dcae323e45a93ccfeb
-    return col.find({'storeLocation': store}, {'_id': 0})
+    col = db["SMARTJIN"]["social"]
+    return col.find({'title': title}, {'_id': 0})
 
-@app.get("/sales/", tags=["list"])
-async def getSales():
+@app.get("/social/", tags=["list"])
+async def getSocialList():
     db = get_database()
-    col = db["sample_supplies"]["sales"]
+    col = db["SMARTJIN"]["social"]
     return col.find({},{'_id': 0,}).limit(50)
 
 @app.get("/data/{id}", tags=["data"])
