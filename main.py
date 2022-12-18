@@ -3,6 +3,7 @@ import json
 from pymongo import MongoClient
 import os
 from dotenv import load_dotenv
+from fastapi.responses import JSONResponse
 load_dotenv()
 
 description = """
@@ -68,14 +69,22 @@ async def root():
 @app.get("/social/{id}", tags=["data"])
 async def getSocial(id: str):
     db = get_database()
-    social = db["SMARTJIN"]["social"].find({'identifier': id}, {'_id': 0})
-    return social
+    col1 = db["SMARTJIN"]["social"]
+    print(id)
+    social = col1.find_one({'identifier': id}, {'_id': 0})
+    result = json.dumps(social, default=str)
+    return json.loads(result)
 
 @app.get("/social/", tags=["list"])
 async def getSocialList():
     db = get_database()
-    list = db["SMARTJIN"]["social"].find().limit(10)
-    return list
+    col = db["SMARTJIN"]["social"]
+    return_string=[]
+    for x in col.find({}).limit(100):
+        result = json.dumps(x["identifier"], default=str)
+        sanitized = json.loads(result)
+        return_string.append(sanitized)
+    return JSONResponse(content=return_string)
 
 @app.get("/data/{id}", tags=["data"])
 async def gets(id):
