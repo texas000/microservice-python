@@ -4,6 +4,7 @@ from pymongo import MongoClient
 import os
 from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
+from fastapi.responses import RedirectResponse
 load_dotenv()
 
 description = """
@@ -62,9 +63,8 @@ data = json.load(f)
 
 @app.get("/")
 async def root():
-    db = get_database()
-    col = db["SMARTJIN"]["agent"]
-    return col.find_one({},{'_id': 0})
+    # Main page redirect to the Swagger Doc
+    return RedirectResponse("https://api.smartjinny.com/docs")
 
 @app.get("/social/{id}", tags=["data"])
 async def getSocial(id: str):
