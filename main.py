@@ -1,11 +1,17 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 import json
 from pymongo import MongoClient
 import os
 from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
 from fastapi.responses import RedirectResponse
+from fastapi.responses import HTMLResponse
 load_dotenv()
+import requests
+from httpx import AsyncClient
+from bs4 import BeautifulSoup
+from urllib.parse import unquote
+from googletrans import Translator
 
 description = """
 Microservice for Smartjinny🚀
@@ -64,7 +70,51 @@ data = json.load(f)
 @app.get("/")
 async def root():
     # Main page redirect to the Swagger Doc
-    return RedirectResponse("https://api.smartjinny.com/docs")
+    return RedirectResponse("/docs")
+
+@app.get("/search", tags=["search"])
+async def naver_search(search_query: str, request: Request):
+    query = unquote(search_query)
+    translator = Translator()
+    lan = translator.detect(query)
+
+    url = f"https://search.naver.com/search.naver?query={query}"
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, "html.parser")
+    result_list = []
+    # NAVER BOX
+    for li in soup.find_all("li", class_="bx"):
+        # Define a list of possible class names for the title element
+        title_classes=["news_tit", "link_tit", "info_title", "api_txt_lines"]
+
+        # Find the title element using any of the possible class names
+        title = None
+        for class_name in title_classes:
+            title = li.find('a', class_=class_name)
+            if title:
+                break
+        if title is None:
+            continue
+        link = title["href"]
+        
+        description_classes=["api_txt_lines dsc_txt", "api_txt_lines dsc_txt_wrap"]
+        
+        description = None
+        for class_name in description_classes:
+            isDescription = li.find('a', class_=class_name)
+            if isDescription:
+                description = li.find('a', class_=class_name).get_text()
+                break
+        if title is None:
+            continue
+        # description = li.find("div", class_="api_txt_lines dsc_txt").get_text()
+        result_list.append({"title": title.get_text(), "link": link, "description": description})
+    res = {"total": len(result_list), "engine": "naver", "data": result_list, "query": query, "lan": lan.lang}
+    db = get_database()
+    search_history = db["SMARTJIN"]["search_history"]
+    result = search_history.insert_one({"request":request.headers, "res": res})
+    print({"log_name": "search_history", "id": str(result.inserted_id)})
+    return res
 
 @app.get("/social/{id}", tags=["data"])
 async def getSocial(id: str):
@@ -101,3 +151,18 @@ async def list_item():
     return {"list": new_list}
 
 f.close()
+
+RED_LIST_API_URL = "https://ws-public.interpol.int/notices/v1/red"
+
+@app.get("/redlist", tags=["interpol"])
+async def get_red_list():
+    response = requests.get(RED_LIST_API_URL)
+    data = response.json()
+    return {"redlist": data}
+
+@app.get("/redlist/{notice_id}", tags=["interpol"])
+async def get_red_notice(notice_id: str):
+    notice_url = f"{RED_LIST_API_URL}/{notice_id}"
+    response = requests.get(notice_url)
+    data = response.json()
+    return {"red_notice": data}
