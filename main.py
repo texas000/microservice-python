@@ -13,6 +13,8 @@ from httpx import AsyncClient
 from bs4 import BeautifulSoup
 from urllib.parse import unquote
 from googletrans import Translator
+from datetime import datetime
+from markdown import markdown
 
 description = """
 Microservice for Smartjinny🚀
@@ -82,6 +84,11 @@ f = open('social.json', encoding='utf-8')
 # a dictionary
 data = json.load(f)
 
+###### Connect Database
+
+db = get_database()
+mongo = db["SMARTJIN"]
+
 @app.get("/health", tags=["health"], summary="Health check API")
 async def root():
     # Main page redirect to the Swagger Doc
@@ -130,9 +137,9 @@ async def naver_search(search_query: str, request: Request):
         # description = li.find("div", class_="api_txt_lines dsc_txt").get_text()
         result_list.append({"title": title.get_text(), "link": link, "description": description})
     res = {"total": len(result_list), "engine": "naver", "data": result_list, "query": query, "lan": lan.lang}
-    db = get_database()
-    search_history = db["SMARTJIN"]["search_history"]
-    result = search_history.insert_one({"request":request.headers, "res": res})
+    search_history = mongo["search_history"]
+    now = datetime.now()
+    result = search_history.insert_one({"request":request.headers, "res": res, "created": now})
     print({"log_name": "search_history", "id": str(result.inserted_id)})
     return res
 
@@ -144,6 +151,16 @@ async def recommendation(query: str):
     response = requests.get(url)
     suggestions = response.json()[1]
     return({"data": suggestions})
+
+@app.get("/search/history", tags=["search"])
+async def getHistory():
+    coll = mongo["search_history"]
+    return_string=[]
+    for x in coll.find({}).limit(10):
+        result = json.dumps(x["res"], default=str)
+        sanitized = json.loads(result)
+        return_string.append(sanitized)
+    return JSONResponse(content=return_string)
 
 @app.get("/blog/content", tags=["blog"])
 async def content(slug: str):
@@ -172,18 +189,32 @@ async def content(slug: str):
     else:
         return {"data": {"head":head, "body": body_html, "status": status}}
 
+@app.post("/blog/push", tags=["blog"])
+async def convert_markdown_to_html(request: Request):
+    # Get the markdown text from the request
+    markdown_text, title, description = await request.body()
+
+    html_collection = mongo["html_documents"]
+
+    # Convert the markdown text to HTML
+    html_text = markdown(markdown_text.decode())
+    # Save the HTML document to MongoDB
+    html_document = {"html": html_text, "created":datetime.now(), "editor": "SMARTJINNY", "updated": datetime.now(), "title": title, "description": description}
+    result = html_collection.insert_one(html_document)
+
+    # Return the HTML document in the response
+    return html_text
+
 @app.get("/social/{id}", tags=["data"])
 async def getSocial(id: str):
-    db = get_database()
-    col1 = db["SMARTJIN"]["social"]
+    col1 = mongo["social"]
     social = col1.find_one({'identifier': id}, {'_id': 0})
     result = json.dumps(social, default=str)
     return json.loads(result)
 
 @app.get("/social/", tags=["list"])
 async def getSocialList():
-    db = get_database()
-    col = db["SMARTJIN"]["social"]
+    col = mongo["social"]
     return_string=[]
     for x in col.find({}).limit(100):
         result = json.dumps(x["identifier"], default=str)
