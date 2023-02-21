@@ -131,6 +131,15 @@ async def naver_search(search_query: str, request: Request):
     print({"log_name": "search_history", "id": str(result.inserted_id)})
     return res
 
+@app.get("/search/recommendation", tags=["search"])
+async def recommendation(query: str):
+    translator = Translator()
+    language = translator.detect(query).lang
+    url = f"https://clients1.google.com/complete/search?client=firefox&q={query}&hl={language}"
+    response = requests.get(url)
+    suggestions = response.json()[1]
+    return({"data": suggestions})
+
 @app.get("/social/{id}", tags=["data"])
 async def getSocial(id: str):
     db = get_database()
