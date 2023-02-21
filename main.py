@@ -82,6 +82,11 @@ f = open('social.json', encoding='utf-8')
 # a dictionary
 data = json.load(f)
 
+@app.get("/health", tags=["health"], summary="Health check API")
+async def root():
+    # Main page redirect to the Swagger Doc
+    return {"data": "true"}
+
 @app.get("/")
 async def root():
     # Main page redirect to the Swagger Doc
@@ -139,6 +144,39 @@ async def recommendation(query: str):
     response = requests.get(url)
     suggestions = response.json()[1]
     return({"data": suggestions})
+
+@app.get("/blog/content", tags=["blog"])
+async def content(slug: str):
+    url = f"https://test-711dbb.webflow.io/blog/{slug}"
+    # Send a GET request to the URL
+    response = requests.get(url)
+
+    status = response.status_code
+
+    # Parse the HTML content of the page using BeautifulSoup
+    soup = BeautifulSoup(response.content, "html.parser")
+
+    # Extract the meta tags
+    meta_tags = soup.find_all("meta")
+
+    # Create an HTML string with all the meta tags
+    head = "<head>\n"
+
+    for tag in meta_tags:
+        # Use the 'prettify' method to get the HTML representation of the tag
+        head += f"{tag.prettify()}\n"
+
+    head += "</head>\n<body>\n</body>"
+
+    # Extract the body content
+    body_content = soup.find("body")
+
+   # Get the HTML representation of the body content
+    body_html = body_content.prettify()
+    if(status!=200):
+        return False
+    else:
+        return {"data": {"head":head, "body": body_html, "status": status}}
 
 @app.get("/social/{id}", tags=["data"])
 async def getSocial(id: str):
