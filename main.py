@@ -192,14 +192,15 @@ async def content(slug: str):
 @app.post("/blog/push", tags=["blog"])
 async def convert_markdown_to_html(request: Request):
     # Get the markdown text from the request
-    markdown_text, title, description = await request.body()
-
+    body = await request.body()
+    parsed_body = json.loads(body)
+    
     html_collection = mongo["html_documents"]
-
+    print(parsed_body["markdown"])
     # Convert the markdown text to HTML
-    html_text = markdown(markdown_text.decode())
+    html_text = markdown(parsed_body["markdown"])
     # Save the HTML document to MongoDB
-    html_document = {"html": html_text, "created":datetime.now(), "editor": "SMARTJINNY", "updated": datetime.now(), "title": title, "description": description}
+    html_document = {"html": html_text, "created":datetime.now(), "editor": "SMARTJINNY", "updated": datetime.now(), "title": parsed_body["title"], "description": parsed_body["description"], "slug": parsed_body["slug"]}
     result = html_collection.insert_one(html_document)
 
     # Return the HTML document in the response
