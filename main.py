@@ -160,13 +160,11 @@ async def content(slug: str):
     meta_tags = soup.find_all("meta")
 
     # Create an HTML string with all the meta tags
-    head = "<head>\n"
+    head = ""
 
     for tag in meta_tags:
         # Use the 'prettify' method to get the HTML representation of the tag
         head += f"{tag.prettify()}\n"
-
-    head += "</head>\n<body>\n</body>"
 
     # Extract the body content
     body_content = soup.find("body")
