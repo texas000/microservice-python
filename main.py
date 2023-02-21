@@ -206,6 +206,23 @@ async def convert_markdown_to_html(request: Request):
     # Return the HTML document in the response
     return html_text
 
+@app.get("/blog/list", tags=["blog"])
+async def getSocialList():
+    col = mongo["html_documents"]
+    return_string=[]
+    for x in col.find({}, {'html': 0}).limit(100):
+        result = json.dumps(x, default=str)
+        sanitized = json.loads(result)
+        return_string.append(sanitized)
+    return JSONResponse(content=return_string)
+
+@app.get("/blog/slug", tags=["blog"])
+async def getSocialList(path: str):
+    col = mongo["html_documents"]
+    content = col.find_one({'slug': path})
+    result = json.dumps(content, default=str)
+    return json.loads(result)
+
 @app.get("/social/{id}", tags=["data"])
 async def getSocial(id: str):
     col1 = mongo["social"]
