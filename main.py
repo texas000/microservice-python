@@ -156,17 +156,13 @@ async def content(slug: str):
     # Parse the HTML content of the page using BeautifulSoup
     soup = BeautifulSoup(response.content, "html.parser")
 
-    # Extract the meta tags
-    meta_tags = soup.find_all("meta")
+    head = {}
+    title = soup.find("title")
+    
+    head["title"]=title.get_text()
+    head["description"]=soup.find("meta", {"property": "og:description"}).attrs['content']
+    head["generator"]="Smartjinny"
 
-    # Create an HTML string with all the meta tags
-    head = ""
-
-    for tag in meta_tags:
-        # Use the 'prettify' method to get the HTML representation of the tag
-        head += f"{tag.prettify()}\n"
-
-    # Extract the body content
     body_content = soup.find("body")
 
    # Get the HTML representation of the body content
@@ -180,7 +176,6 @@ async def content(slug: str):
 async def getSocial(id: str):
     db = get_database()
     col1 = db["SMARTJIN"]["social"]
-    print(id)
     social = col1.find_one({'identifier': id}, {'_id': 0})
     result = json.dumps(social, default=str)
     return json.loads(result)
