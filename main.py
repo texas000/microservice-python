@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
 import json
-from pymongo import MongoClient
+from pymongo import MongoClient, DESCENDING
 import os
 from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
@@ -15,6 +15,7 @@ from urllib.parse import unquote
 from googletrans import Translator
 from datetime import datetime
 from markdown import markdown
+import openai
 
 description = """
 Microservice for Smartjinny🚀
@@ -156,8 +157,10 @@ async def recommendation(query: str):
 async def getHistory():
     coll = mongo["search_history"]
     return_string=[]
-    for x in coll.find({}).limit(10):
-        result = json.dumps(x["res"], default=str)
+    his = coll.find({}, {'_id': 0, 'request': 0}).sort( "created", DESCENDING ).limit(20)
+    for x in his:
+        # print(x)
+        result = json.dumps(x, default=str)
         sanitized = json.loads(result)
         return_string.append(sanitized)
     return JSONResponse(content=return_string)
@@ -270,3 +273,18 @@ async def get_red_notice(notice_id: str):
     response = requests.get(notice_url)
     data = response.json()
     return {"red_notice": data}
+
+openai.api_key=os.environ.get('OPENAI_API_KEY')
+
+@app.get("/ai/code", tags=["ai"])
+async def code_gpt(query: str):
+    response = openai.Completion.create(
+        model="text-davinci-003",
+        prompt=query,
+        temperature=0.7,
+        max_tokens=256,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0
+    )
+    return response
