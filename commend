@@ -6,5 +6,3 @@ uvicorn main:app --reload
 
 # generate the req file when you import new package 
 pip freeze > requirements.txt
-
-python -m  pipreqs.pipreqs .
