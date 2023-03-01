@@ -302,15 +302,20 @@ async def upload_file(file: UploadFile = File(...)):
     with FTP(FTP_HOST, FTP_USER, FTP_PASS) as ftp:
         ftp.cwd(FTP_DIR)
         ftp.storbinary(f"STOR {file.filename}", file.file)
+        upload_col = mongo["file_upload"]
+        metadata = {"filename": file.filename, "content_type": file.content_type, "updated": datetime.now()}
+        upload_col.insert_one(metadata)
     return {"filename": file.filename}
 
 @app.get("/download/{filename}")
 async def download_file(filename: str):
     buffer = BytesIO()
     with FTP(FTP_HOST, FTP_USER, FTP_PASS) as ftp:
-        print(f'WELCOME: {ftp.getwelcome()}')
         ftp.cwd(FTP_DIR)
         ftp.retrbinary(f"RETR {filename}", buffer.write)
         ftp.quit()
     buffer.seek(0)
+    download_col = mongo["file_download"]
+    metadata = {"filename": filename, "updated": datetime.now()}
+    download_col.insert_one(metadata)
     return StreamingResponse(buffer, media_type='application/octet-stream', headers={'Content-Disposition': f'attachment; filename="{filename}"'})
