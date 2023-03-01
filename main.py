@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, File, UploadFile
+from fastapi.responses import FileResponse
 import json
 from pymongo import MongoClient, DESCENDING
 import os
@@ -15,6 +16,7 @@ from urllib.parse import unquote
 from googletrans import Translator
 from datetime import datetime
 from markdown import markdown
+from ftplib import FTP
 import openai
 
 description = """
@@ -288,3 +290,23 @@ async def code_gpt(query: str):
         presence_penalty=0
     )
     return response
+
+FTP_HOST = os.environ.get('FTP_HOST')
+FTP_USER = os.environ.get('FTP_USER')
+FTP_PASS = os.environ.get('FTP_PASS')
+FTP_DIR = os.environ.get('FTP_DIR')
+
+@app.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    with FTP(FTP_HOST, FTP_USER, FTP_PASS) as ftp:
+        ftp.cwd(FTP_DIR)
+        ftp.storbinary(f"STOR {file.filename}", file.file)
+    return {"filename": file.filename}
+
+@app.get("/download/{filename}")
+async def download_file(filename: str):
+    with FTP(FTP_HOST, FTP_USER, FTP_PASS) as ftp:
+        ftp.cwd(FTP_DIR)
+        with open(filename, "wb") as f:
+            ftp.retrbinary(f"RETR {filename}", f.write)
+    return FileResponse(filename)
