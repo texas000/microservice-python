@@ -295,7 +295,7 @@ async def code_gpt(query: str):
 FTP_HOST = os.environ.get('FTP_HOST')
 FTP_USER = os.environ.get('FTP_USER')
 FTP_PASS = os.environ.get('FTP_PASS')
-FTP_DIR = os.environ.get('FTP_DIR')
+FTP_DIR = '/shares/USB_Storage/'
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
