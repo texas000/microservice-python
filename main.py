@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request, File, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import StreamingResponse, FileResponse
 import json
 from pymongo import MongoClient, DESCENDING
 import os
@@ -17,6 +17,7 @@ from googletrans import Translator
 from datetime import datetime
 from markdown import markdown
 from ftplib import FTP
+from io import BytesIO
 import openai
 
 description = """
@@ -305,8 +306,11 @@ async def upload_file(file: UploadFile = File(...)):
 
 @app.get("/download/{filename}")
 async def download_file(filename: str):
+    buffer = BytesIO()
     with FTP(FTP_HOST, FTP_USER, FTP_PASS) as ftp:
+        print(f'WELCOME: {ftp.getwelcome()}')
         ftp.cwd(FTP_DIR)
-        with open(filename, "wb") as f:
-            ftp.retrbinary(f"RETR {filename}", f.write)
-    return FileResponse(filename)
+        ftp.retrbinary(f"RETR {filename}", buffer.write)
+        ftp.quit()
+    buffer.seek(0)
+    return StreamingResponse(buffer, media_type='application/octet-stream', headers={'Content-Disposition': f'attachment; filename="{filename}"'})
