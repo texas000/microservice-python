@@ -330,3 +330,12 @@ async def download_file(filename: str):
 
     return StreamingResponse(buffer, headers={'Content-Disposition': f'inline; filename="{filename}"'})
 
+@app.get("/assets")
+async def asset_list():
+    col = mongo["file_upload"]
+    return_string=[]
+    for x in col.find({}, {'content_type': 0}).limit(100):
+        result = json.dumps(x, default=str)
+        sanitized = json.loads(result)
+        return_string.append(sanitized)
+    return JSONResponse(content=return_string)
