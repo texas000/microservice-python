@@ -295,18 +295,27 @@ async def code_gpt(query: str):
 FTP_HOST = os.environ.get('FTP_HOST')
 FTP_USER = os.environ.get('FTP_USER')
 FTP_PASS = os.environ.get('FTP_PASS')
-FTP_DIR = '/shares/USB_Storage/'
+FTP_DIR = '/shares/USB_Storage/smartjinny'
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
     with FTP(FTP_HOST, FTP_USER, FTP_PASS) as ftp:
         ftp.cwd(FTP_DIR)
-        ftp.storbinary(f"STOR {file.filename}", file.file)
+        file_name = file.filename
+        if file_name in ftp.nlst():
+            file_extension = file.filename.split('.')[-1]
+            file_base_name = file.filename.split('.')[0]
+            i = 1
+            while f"{file_base_name}_{i}.{file_extension}" in ftp.nlst():
+                i +=1
+            file_name = f"{file_base_name}_{i}.{file_extension}" 
+        ftp.storbinary(f"STOR {file_name}", file.file)
         upload_col = mongo["file_upload"]
-        metadata = {"filename": file.filename, "content_type": file.content_type, "updated": datetime.now()}
+        metadata = {"filename": file_name, "content_type": file.content_type, "updated": datetime.now()}
         upload_col.insert_one(metadata)
-    return {"filename": file.filename}
+    return {"filename": file_name}
 
+# Vercel has timeout of 10 second in free version
 @app.get("/download/{filename}")
 async def download_file(filename: str):
     buffer = BytesIO()
@@ -319,3 +328,4 @@ async def download_file(filename: str):
     metadata = {"filename": filename, "updated": datetime.now()}
     download_col.insert_one(metadata)
     return StreamingResponse(buffer, media_type='application/octet-stream', headers={'Content-Disposition': f'attachment; filename="{filename}"'})
+
