@@ -327,5 +327,6 @@ async def download_file(filename: str):
     download_col = mongo["file_download"]
     metadata = {"filename": filename, "updated": datetime.now()}
     download_col.insert_one(metadata)
-    return StreamingResponse(buffer, media_type='application/octet-stream', headers={'Content-Disposition': f'attachment; filename="{filename}"'})
+
+    return StreamingResponse(buffer, headers={'Content-Disposition': f'inline; filename="{filename}"'})
 
