@@ -18,8 +18,8 @@ from datetime import datetime
 from markdown import markdown
 from ftplib import FTP
 from io import BytesIO
+import psycopg2
 import openai
-
 description = """
 Microservice for Smartjinny🚀
 
@@ -339,3 +339,17 @@ async def asset_list():
         sanitized = json.loads(result)
         return_string.append(sanitized)
     return JSONResponse(content=return_string)
+
+POSTGRE_CONNECT = os.environ.get('POSTGRE_CONNECT')
+conn = psycopg2.connect(POSTGRE_CONNECT)
+
+@app.get("/postgresql")
+async def test():
+    with conn.cursor() as cur:
+        # cur.execute("SELECT now()")
+        cur.execute("""
+        select now();
+        """)
+        res = cur.fetchall()
+        conn.commit()
+        return res
