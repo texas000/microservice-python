@@ -1,4 +1,5 @@
 {
 	"builds": [{ "src": "main.py", "use": "@vercel/python" }],
-	"routes": [{ "src": "/(.*)", "dest": "main.py" }]
+	"routes": [{ "src": "/(.*)", "dest": "main.py" }],
+	"installCommand": "curl --create-dirs -o $HOME/.postgresql/root.crt -O https://cockroachlabs.cloud/clusters/a0b604e2-0bce-48be-904d-f25640efb324/cert"
 }
