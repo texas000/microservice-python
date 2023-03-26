@@ -334,7 +334,7 @@ async def download_file(filename: str):
 async def asset_list():
     col = mongo["file_upload"]
     return_string=[]
-    for x in col.find({}, {'content_type': 0}).limit(100):
+    for x in col.find({}, {}).limit(100):
         result = json.dumps(x, default=str)
         sanitized = json.loads(result)
         return_string.append(sanitized)
