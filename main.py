@@ -244,7 +244,8 @@ async def getSocialList():
         result = json.dumps(x["identifier"], default=str)
         sanitized = json.loads(result)
         return_string.append(sanitized)
-    return JSONResponse(content=return_string)
+    headers = {"Cache-Control": "s-maxage=31536000", "X-Smartjinny-Custom": "smartjin-01-exp", "Access-Control-Allow-Origin": "*"}
+    return JSONResponse(content=return_string, headers=headers)
 
 @app.get("/data/{id}", tags=["data"])
 async def gets(id):
@@ -338,5 +339,4 @@ async def asset_list():
         result = json.dumps(x, default=str)
         sanitized = json.loads(result)
         return_string.append(sanitized)
-    headers = {"Cache-Control": "s-maxage=31536000", "X-Smartjinny-Custom": "smartjin-01-exp", "Access-Control-Allow-Origin": "*"}
-    return JSONResponse(content=return_string, headers=headers)
+    return JSONResponse(content=return_string)
