@@ -338,5 +338,5 @@ async def asset_list():
         result = json.dumps(x, default=str)
         sanitized = json.loads(result)
         return_string.append(sanitized)
-    headers = {"Cache-Control": "s-maxage=31536000", "X-Smartjinny-Custom": "smartjin-01-exp"}
+    headers = {"Cache-Control": "s-maxage=31536000", "X-Smartjinny-Custom": "smartjin-01-exp", "Access-Control-Allow-Origin": "*"}
     return JSONResponse(content=return_string, headers=headers)
