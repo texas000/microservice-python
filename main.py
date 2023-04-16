@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, File, UploadFile
+from fastapi import FastAPI, Request, File, UploadFile, APIRouter, HTTPException
 from fastapi.responses import StreamingResponse, FileResponse
 import json
 from pymongo import MongoClient, DESCENDING
@@ -19,6 +19,7 @@ from markdown import markdown
 from ftplib import FTP
 from io import BytesIO
 import openai
+from src import env
 
 description = """
 Microservice for Smartjinny🚀
@@ -60,6 +61,9 @@ app = FastAPI(
     openapi_tags=tags_metadata
 )
 
+# router = APIRouter()
+app.include_router(env.router)
+
 origins = [
     "https://smartjinny.com",
     "http://localhost",
@@ -76,7 +80,6 @@ app.add_middleware(
 
 # Connect Database
 def get_database():
-
     CONNECTION_STRING = os.environ.get('MONGODB_URI')
     # Create a connection using MongoClient
     client = MongoClient(CONNECTION_STRING)
