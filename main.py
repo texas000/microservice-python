@@ -1,7 +1,7 @@
 from fastapi import FastAPI, APIRouter
 import json
 from dotenv import load_dotenv
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 load_dotenv()
 from src import register
@@ -10,21 +10,6 @@ description = """
 # 🚀 Microservice
 """
 
-tags_metadata = [
-    {
-        "name": "data",
-        "description": "Get data by id, static json data in env",
-    },
-    {
-        "name": "list",
-        "description": "return all the id, static json data in env",
-        "externalDocs": {
-            "description": "external docs",
-            "url": "https://newyorkselectshop.com/",
-        },
-    },
-]
-
 app = FastAPI(
     title="New York Select Shop",
     description=description,
@@ -32,8 +17,7 @@ app = FastAPI(
     license_info={
         "name": "Apache 2.0",
         "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
-    },
-    openapi_tags=tags_metadata
+    }
 )
 
 router = APIRouter()
@@ -55,8 +39,11 @@ app.add_middleware(
 
 app.include_router(router)
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
 async def root():
     return RedirectResponse("/docs")
 
 
+@app.get('/favicon.ico', include_in_schema=False)
+async def favicon():
+    return FileResponse('favicon.ico')
