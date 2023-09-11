@@ -1,4 +1,5 @@
 .vercel
 .env
+__pycache__
 /__pycache__
 kakao_token.json

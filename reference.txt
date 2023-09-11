@@ -1,7 +1,0 @@
-Useful API TODO
-
-http://myhome.chosun.com/rss/www_section_rss.xml
-
-https://news.google.com/rss?pz=1&hl=ko&topic=po&gl=KR&ceid=KR:ko
-
-https://rss.nytimes.com/services/xml/rss/nyt/US.xml
