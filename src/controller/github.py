@@ -1,9 +1,9 @@
-from fastapi import FastAPI, Request, Header, HTTPException
+from fastapi import APIRouter, Request, Header, HTTPException
 import httpx
 import random
 import os
 
-app = FastAPI()
+router = APIRouter(prefix="/github", tags=["Github"])
 
 # GITHUB 에서 MR이 생길때 코드 리뷰를 할 수 있도록 하는 API - MR 의 내용을 분석해서 COMMENT 를 남기도록 하는게 목표
 
@@ -14,7 +14,7 @@ GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 def generate_ticket_number():
     return f"TICKET-{random.randint(1000, 9999)}"
 
-@app.post("/webhook")
+@router.post("/webhook")
 async def github_webhook(request: Request, x_github_event: str = Header(None)):
     payload = await request.json()
 
